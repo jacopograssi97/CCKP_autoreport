@@ -4,6 +4,7 @@ import requests
 import matplotlib.pyplot as plt
 import os
 from io import BytesIO
+from stqdm import stqdm
 from docx import Document
 from docx.shared import Cm, RGBColor, Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
@@ -229,119 +230,125 @@ doc = set_up_doc()
 
 if st.button('Get data'):
 
-    doc.add_page_break() 
-    title = doc.add_heading('ERA5', level=2)
-    title.style.font.color.rgb = RGBColor(0, 0, 0)
-    title.bold = True
-    title.style.font.name = "Calibri"
-    title.style.font.size = Pt(11)
-    title.add_run().add_break(WD_BREAK.LINE)
-
-    for var in variable_era_code:
+    with st.status("Getting data..."):
 
         doc.add_page_break() 
-        tab = make_table('era5-x0.5', 'timeseries', var, 'annual', '1950-2020', 'mean', 'historical', 'era5', 'era5', 'mean', region_code, region)
-        fig = make_plot_single(tab, var, False)
-        fig.savefig('tmp.png', bbox_inches='tight', dpi=300)
+        title = doc.add_heading('ERA5', level=2)
+        title.style.font.color.rgb = RGBColor(0, 0, 0)
+        title.bold = True
+        title.style.font.name = "Calibri"
+        title.style.font.size = Pt(11)
+        title.add_run().add_break(WD_BREAK.LINE)
 
-        p = doc.add_paragraph().add_run(var_ref[var_ref['Code'] == var].Variable.values[0])
+        st.write('**Getting ERA5 data**')
 
-        p.bold = True
-        p.italic = True
-        doc.add_picture('tmp.png')
-        os.remove('tmp.png')
-        doc.add_paragraph().add_run(var_ref[var_ref['Code'] == var].Description.values[0])
+        for var in stqdm(variable_era_code):
 
-        # Creating a table object
-        table = doc.add_table(rows=1, cols=2)
+            doc.add_page_break() 
+            tab = make_table('era5-x0.5', 'timeseries', var, 'annual', '1950-2020', 'mean', 'historical', 'era5', 'era5', 'mean', region_code, region)
+            fig = make_plot_single(tab, var, False)
+            fig.savefig('tmp.png', bbox_inches='tight', dpi=300)
 
-        # Adding heading in the 1st row of the table
-        row = table.rows[0].cells
-        row[0].text = 'Year'
-        row[1].text = f'ERA5 value [{var_ref[var_ref["Code"] == var].Unit.values[0]}]'
+            p = doc.add_paragraph().add_run(var_ref[var_ref['Code'] == var].Variable.values[0])
+
+            p.bold = True
+            p.italic = True
+            doc.add_picture('tmp.png')
+            os.remove('tmp.png')
+            doc.add_paragraph().add_run(var_ref[var_ref['Code'] == var].Description.values[0])
+
+            # Creating a table object
+            table = doc.add_table(rows=1, cols=2)
+
+            # Adding heading in the 1st row of the table
+            row = table.rows[0].cells
+            row[0].text = 'Year'
+            row[1].text = f'ERA5 value [{var_ref[var_ref["Code"] == var].Unit.values[0]}]'
 
 
-        # Adding data from the list to the table
-        for y in range(1950,2021,10):
+            # Adding data from the list to the table
+            for y in range(1950,2021,10):
 
-            # Adding a row and then adding data in it.
-            row = table.add_row().cells
-            # Converting id to string as table can only take string input
-            row[0].text = str(y)
-            row[1].text = f'{tab[tab.index.year==y].values[0][0]:6.2f}'
-    
+                # Adding a row and then adding data in it.
+                row = table.add_row().cells
+                # Converting id to string as table can only take string input
+                row[0].text = str(y)
+                row[1].text = f'{tab[tab.index.year==y].values[0][0]:6.2f}'
+        
 
-        table.style = 'Colorful List'
-
-    doc.add_page_break() 
-    title = doc.add_heading('CMIP6', level=2)
-    title.style.font.color.rgb = RGBColor(0, 0, 0)
-    title.bold = True
-    title.style.font.name = "Calibri"
-    title.style.font.size = Pt(11)
-    title.add_run().add_break(WD_BREAK.LINE)
-
-    for var in variable_cmip_code:
+            table.style = 'Colorful List'
 
         doc.add_page_break() 
+        title = doc.add_heading('CMIP6', level=2)
+        title.style.font.color.rgb = RGBColor(0, 0, 0)
+        title.bold = True
+        title.style.font.name = "Calibri"
+        title.style.font.size = Pt(11)
+        title.add_run().add_break(WD_BREAK.LINE)
 
-        tab_historical = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'median', 'historical', 'ensemble', 'all', 'mean', region_code, region)
-        tab_historical_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'p10', 'historical', 'ensemble', 'all', 'mean', region_code, region)
-        tab_historical_upper = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'p90', 'historical', 'ensemble', 'all', 'mean', region_code, region)
+        st.write('**Getting CMIP6 data**')
+
+        for var in stqdm(variable_cmip_code):
+
+            doc.add_page_break() 
+
+            tab_historical = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'median', 'historical', 'ensemble', 'all', 'mean', region_code, region)
+            tab_historical_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'p10', 'historical', 'ensemble', 'all', 'mean', region_code, region)
+            tab_historical_upper = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'p90', 'historical', 'ensemble', 'all', 'mean', region_code, region)
+            
+            tab_ssp126 = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'median', 'ssp126', 'ensemble', 'all', 'mean', region_code, region)
+            tab_ssp126_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p10', 'ssp126', 'ensemble', 'all', 'mean', region_code, region)
+            tab_ssp126_upper = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p90', 'ssp126', 'ensemble', 'all', 'mean', region_code, region)
+
+            tab_ssp245 = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'median', 'ssp245', 'ensemble', 'all', 'mean', region_code, region)
+            tab_ssp245_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p10', 'ssp245', 'ensemble', 'all', 'mean', region_code, region)
+            tab_ssp245_upper = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p90', 'ssp245', 'ensemble', 'all', 'mean', region_code, region)
+
+            tab_ssp585 = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'median', 'ssp585', 'ensemble', 'all', 'mean', region_code, region)
+            tab_ssp585_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p10', 'ssp585', 'ensemble', 'all', 'mean', region_code, region)
+            tab_ssp585_upper = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p90', 'ssp585', 'ensemble', 'all', 'mean', region_code, region)
+
+            tab_tot = pd.concat([tab_historical, tab_historical_lower, tab_historical_upper, tab_ssp126, tab_ssp126_lower, tab_ssp126_upper, tab_ssp245, tab_ssp245_lower, tab_ssp245_upper, tab_ssp585, tab_ssp585_lower, tab_ssp585_upper], axis=1)
+            tab_tot = tab_tot.rolling(5).mean()
+            
+            fig = make_plot_multi(tab_historical, tab_historical_lower, tab_historical_upper,
+                            tab_ssp126, tab_ssp126_lower, tab_ssp126_upper,
+                            tab_ssp245, tab_ssp245_lower, tab_ssp245_upper,
+                            tab_ssp585, tab_ssp585_lower, tab_ssp585_upper, False)
+            
+            fig.savefig('tmp.png', bbox_inches='tight', dpi=300)
+
+            p = doc.add_paragraph().add_run(var_ref[var_ref['Code'] == var].Variable.values[0])
+
+            p.bold = True
+            p.italic = True
+            doc.add_picture('tmp.png')
+            os.remove('tmp.png')
+            doc.add_paragraph().add_run(var_ref[var_ref['Code'] == var].Description.values[0])
+
+            # Creating a table object
+            table = doc.add_table(rows=1, cols=4)
+
+            # Adding heading in the 1st row of the table
+            row = table.rows[0].cells
+            row[0].text = 'Year'
+            row[1].text = f'SSP 1-2.6 [{var_ref[var_ref["Code"] == var].Unit.values[0]}]'
+            row[2].text = f'SSP 2-4.5 [{var_ref[var_ref["Code"] == var].Unit.values[0]}]'
+            row[3].text = f'SSP 5-8.5 [{var_ref[var_ref["Code"] == var].Unit.values[0]}]'
+
+            # Adding data from the list to the table
+            for y in range(2020,2101,10):
+                # Adding a row and then adding data in it.
+                row = table.add_row().cells
+                # Converting id to string as table can only take string input
+                row[0].text = str(y)
+
+                row[1].text = f"{tab_tot[tab_tot.index.year==y][f'{var}_ssp126_median'].values[0]:6.2f}"
+                row[2].text = f"{tab_tot[tab_tot.index.year==y][f'{var}_ssp245_median'].values[0]:6.2f}"
+                row[3].text = f"{tab_tot[tab_tot.index.year==y][f'{var}_ssp585_median'].values[0]:6.2f}"
         
-        tab_ssp126 = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'median', 'ssp126', 'ensemble', 'all', 'mean', region_code, region)
-        tab_ssp126_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p10', 'ssp126', 'ensemble', 'all', 'mean', region_code, region)
-        tab_ssp126_upper = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p90', 'ssp126', 'ensemble', 'all', 'mean', region_code, region)
 
-        tab_ssp245 = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'median', 'ssp245', 'ensemble', 'all', 'mean', region_code, region)
-        tab_ssp245_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p10', 'ssp245', 'ensemble', 'all', 'mean', region_code, region)
-        tab_ssp245_upper = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p90', 'ssp245', 'ensemble', 'all', 'mean', region_code, region)
-
-        tab_ssp585 = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'median', 'ssp585', 'ensemble', 'all', 'mean', region_code, region)
-        tab_ssp585_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p10', 'ssp585', 'ensemble', 'all', 'mean', region_code, region)
-        tab_ssp585_upper = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '2015-2100', 'p90', 'ssp585', 'ensemble', 'all', 'mean', region_code, region)
-
-        tab_tot = pd.concat([tab_historical, tab_historical_lower, tab_historical_upper, tab_ssp126, tab_ssp126_lower, tab_ssp126_upper, tab_ssp245, tab_ssp245_lower, tab_ssp245_upper, tab_ssp585, tab_ssp585_lower, tab_ssp585_upper], axis=1)
-        tab_tot = tab_tot.rolling(5).mean()
-        
-        fig = make_plot_multi(tab_historical, tab_historical_lower, tab_historical_upper,
-                        tab_ssp126, tab_ssp126_lower, tab_ssp126_upper,
-                        tab_ssp245, tab_ssp245_lower, tab_ssp245_upper,
-                        tab_ssp585, tab_ssp585_lower, tab_ssp585_upper, False)
-        
-        fig.savefig('tmp.png', bbox_inches='tight', dpi=300)
-
-        p = doc.add_paragraph().add_run(var_ref[var_ref['Code'] == var].Variable.values[0])
-
-        p.bold = True
-        p.italic = True
-        doc.add_picture('tmp.png')
-        os.remove('tmp.png')
-        doc.add_paragraph().add_run(var_ref[var_ref['Code'] == var].Description.values[0])
-
-        # Creating a table object
-        table = doc.add_table(rows=1, cols=4)
-
-        # Adding heading in the 1st row of the table
-        row = table.rows[0].cells
-        row[0].text = 'Year'
-        row[1].text = f'SSP 1-2.6 [{var_ref[var_ref["Code"] == var].Unit.values[0]}]'
-        row[2].text = f'SSP 2-4.5 [{var_ref[var_ref["Code"] == var].Unit.values[0]}]'
-        row[3].text = f'SSP 5-8.5 [{var_ref[var_ref["Code"] == var].Unit.values[0]}]'
-
-        # Adding data from the list to the table
-        for y in range(2020,2101,10):
-            # Adding a row and then adding data in it.
-            row = table.add_row().cells
-            # Converting id to string as table can only take string input
-            row[0].text = str(y)
-
-            row[1].text = f"{tab_tot[tab_tot.index.year==y][f'{var}_ssp126_median'].values[0]:6.2f}"
-            row[2].text = f"{tab_tot[tab_tot.index.year==y][f'{var}_ssp245_median'].values[0]:6.2f}"
-            row[3].text = f"{tab_tot[tab_tot.index.year==y][f'{var}_ssp585_median'].values[0]:6.2f}"
-    
-
-        table.style = 'Colorful List'
+            table.style = 'Colorful List'
         
     st.success('Data loaded successfully')
     data_loaded = True

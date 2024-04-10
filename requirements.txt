@@ -4,3 +4,4 @@ requests
 matplotlib
 python-docx
 openpyxl
+stqdm

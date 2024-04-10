@@ -229,6 +229,7 @@ doc = set_up_doc()
 
 if st.button('Get data'):
 
+    doc.add_page_break() 
     title = doc.add_heading('ERA5', level=2)
     title.style.font.color.rgb = RGBColor(0, 0, 0)
     title.bold = True
@@ -238,6 +239,7 @@ if st.button('Get data'):
 
     for var in variable_era_code:
 
+        doc.add_page_break() 
         tab = make_table('era5-x0.5', 'timeseries', var, 'annual', '1950-2020', 'mean', 'historical', 'era5', 'era5', 'mean', region_code, region)
         fig = make_plot_single(tab, var, False)
         fig.savefig('tmp.png', bbox_inches='tight', dpi=300)
@@ -271,7 +273,7 @@ if st.button('Get data'):
 
         table.style = 'Colorful List'
 
-
+    doc.add_page_break() 
     title = doc.add_heading('CMIP6', level=2)
     title.style.font.color.rgb = RGBColor(0, 0, 0)
     title.bold = True
@@ -280,6 +282,8 @@ if st.button('Get data'):
     title.add_run().add_break(WD_BREAK.LINE)
 
     for var in variable_cmip_code:
+
+        doc.add_page_break() 
 
         tab_historical = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'median', 'historical', 'ensemble', 'all', 'mean', region_code, region)
         tab_historical_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'p10', 'historical', 'ensemble', 'all', 'mean', region_code, region)
@@ -340,7 +344,6 @@ if st.button('Get data'):
         table.style = 'Colorful List'
         
     st.success('Data loaded successfully')
-
     data_loaded = True
 
 if data_loaded == True:

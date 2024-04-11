@@ -95,6 +95,7 @@ def make_plot_multi(historical, historical_lower, historical_upper,
     return fig
 
 def set_up_doc():
+
     doc = Document()
     style = doc.styles['Normal']
     style.paragraph_format.line_spacing = 1.15
@@ -108,6 +109,36 @@ def set_up_doc():
     title.style.font.name = "Calibri"
     title.style.font.size = Pt(11)
     title.add_run().add_break(WD_BREAK.LINE)
+
+    met = doc.add_heading('Methodology', level=2)
+    met.style.font.color.rgb = RGBColor(0, 0, 0)
+    met.bold = True
+    met.style.font.name = "Calibri"
+    met.style.font.size = Pt(11)
+    met.add_run().add_break(WD_BREAK.LINE)
+
+    met_desc = [f'The climatic characterization and the analysis of the possible future evolution of the climate for {region}, {country} was carried out through the analysis of the following data:', 
+                'For the historical climatic trends, data from the ERA5  (European ReAnalysis version5) reanalysis system were used, which provides hourly estimates of numerous atmospheric, terrestrial and oceanic climatic variables. The data covers the Earth on a 30 km grid and resolves the atmosphere using 137 levels from the surface to an altitude of 80 km. Information on uncertainties is also provided for variables with low spatial and temporal resolutions. Quality assured monthly updates of ERA5 (1950 to present) are released within 3 months in real time. Preliminary daily dataset updates are available to users within 5 days in real time.',
+                'Finally, data relating to climate projections for the period 2014-2100 were obtained from the Coupled Model Intercomparison Project Phase 6 (CMIP6)  a project of the Working Group on Coupled Modeling (WGCM) of the World Climate Reserach Program (WGCM), which coordinates since 1995 the global climate modeling experiments carried out by various working groups (for Italy by the Euro-Mediterranean Center for Climate Change (CMCC)), through the definition of common protocols and drivers for all models. The data is made available on a 100x100km grid and for a series of socio-economic scenarios (Shared Socioeconomic Pathways - SSP) which reflect different possible evolution scenarios of greenhouse gas emissions.',
+                'The data used are those referring to the Multi model ensemble for the following scenarios:',
+                'SSP1-2.6: optimistic scenario in which global CO2 emissions are drastically reduced reaching net zero after 2050 thanks to an evolution of societies towards environmental and social sustainability and temperatures stabilize around 1.8°C more by the end of the century.',
+                'SSP2-4.5: Intermediate scenario in which CO2 emissions hover around current levels before starting to decline mid-century but fail to reach net zero by 2100. Socio-economic factors follow their historical trends without significant changes. Progress towards sustainability is slow, with development and income growing unevenly. In this scenario, temperatures rise by 2.7°C by the end of the century.', 
+                'SSP5-8.5: Scenario where current CO2 emission levels roughly double by 2050. The global economy is growing rapidly, but this growth is fueled by fossil fuel exploitation and high-intensive lifestyles energy. By 2100, the global average temperature will be as much as 4.4°C higher.']
+    
+    [doc.add_paragraph(met) for met in met_desc]
+
+    reg = doc.add_heading('Regional climatology', level=2)
+    reg.style.font.color.rgb = RGBColor(0, 0, 0)
+    reg.bold = True
+    reg.style.font.name = "Calibri"
+    reg.style.font.size = Pt(11)
+    reg.add_run().add_break(WD_BREAK.LINE)
+
+    reg_desc = [f'ADD GENERICAL CLIMATE INFORMATION FOR {region}, {country}. Reliable sources are the CCKP, Wikipedia, ...',
+                'You can follow the scheme: climate classification of the region according to Kopper']
+
+    [doc.add_paragraph(reg) for reg in reg_desc]
+
 
     return doc
 
@@ -141,7 +172,7 @@ with col2:
     region = st.selectbox('Region', all_reg)
     region_code = geo_ref[(geo_ref['Country'] == country) & (geo_ref['State'] == region)]['State Code'].values[0]
 
-
+st.write(f'Additional resources about all the countries [here](https://climateknowledgeportal.worldbank.org/general-resources).')
 # Defining variable
 st.subheader('Select variables')
 
@@ -233,7 +264,7 @@ if st.button('Get data'):
     with st.status("Getting data..."):
 
         doc.add_page_break() 
-        title = doc.add_heading('ERA5', level=2)
+        title = doc.add_heading('Historical trends of the main climatic indicators from ERA5', level=2)
         title.style.font.color.rgb = RGBColor(0, 0, 0)
         title.bold = True
         title.style.font.name = "Calibri"
@@ -244,7 +275,6 @@ if st.button('Get data'):
 
         for var in stqdm(variable_era_code):
 
-            doc.add_page_break() 
             tab = make_table('era5-x0.5', 'timeseries', var, 'annual', '1950-2020', 'mean', 'historical', 'era5', 'era5', 'mean', region_code, region)
             fig = make_plot_single(tab, var, False)
             fig.savefig('tmp.png', bbox_inches='tight', dpi=300)
@@ -277,9 +307,10 @@ if st.button('Get data'):
         
 
             table.style = 'Colorful List'
+            doc.add_page_break() 
 
-        doc.add_page_break() 
-        title = doc.add_heading('CMIP6', level=2)
+        
+        title = doc.add_heading('Future projections of key climate indicators from CMIP6', level=2)
         title.style.font.color.rgb = RGBColor(0, 0, 0)
         title.bold = True
         title.style.font.name = "Calibri"
@@ -289,8 +320,6 @@ if st.button('Get data'):
         st.write('**Getting CMIP6 data**')
 
         for var in stqdm(variable_cmip_code):
-
-            doc.add_page_break() 
 
             tab_historical = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'median', 'historical', 'ensemble', 'all', 'mean', region_code, region)
             tab_historical_lower = make_table('cmip6-x0.25', 'timeseries', var, 'annual', '1950-2014', 'p10', 'historical', 'ensemble', 'all', 'mean', region_code, region)
@@ -349,6 +378,7 @@ if st.button('Get data'):
         
 
             table.style = 'Colorful List'
+            doc.add_page_break() 
         
     st.success('Data loaded successfully')
     data_loaded = True

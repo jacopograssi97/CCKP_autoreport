@@ -125,7 +125,7 @@ def set_up_doc():
                 'SSP2-4.5: Intermediate scenario in which CO2 emissions hover around current levels before starting to decline mid-century but fail to reach net zero by 2100. Socio-economic factors follow their historical trends without significant changes. Progress towards sustainability is slow, with development and income growing unevenly. In this scenario, temperatures rise by 2.7°C by the end of the century.', 
                 'SSP5-8.5: Scenario where current CO2 emission levels roughly double by 2050. The global economy is growing rapidly, but this growth is fueled by fossil fuel exploitation and high-intensive lifestyles energy. By 2100, the global average temperature will be as much as 4.4°C higher.']
     
-    [doc.add_paragraph(met) for met in met_desc]
+    a = [doc.add_paragraph(met) for met in met_desc]
 
     reg = doc.add_heading('Regional climatology', level=2)
     reg.style.font.color.rgb = RGBColor(0, 0, 0)
@@ -137,7 +137,7 @@ def set_up_doc():
     reg_desc = [f'ADD GENERICAL CLIMATE INFORMATION FOR {region}, {country}. Reliable sources are the CCKP, Wikipedia, ...',
                 'You can follow the scheme: climate classification of the region according to Kopper']
 
-    [doc.add_paragraph(reg) for reg in reg_desc]
+    a = [doc.add_paragraph(reg) for reg in reg_desc]
 
 
     return doc

@@ -275,7 +275,7 @@ if st.button('Get data'):
 
         for var in stqdm(variable_era_code):
 
-            tab = make_table('era5-x0.5', 'timeseries', var, 'annual', '1950-2020', 'mean', 'historical', 'era5', 'era5', 'mean', region_code, region)
+            tab = make_table('era5-x0.25', 'timeseries', var, 'annual', '1950-2022', 'mean', 'historical', 'era5', 'x0.25', 'mean', region_code, region)
             fig = make_plot_single(tab, var, False)
             fig.savefig('tmp.png', bbox_inches='tight', dpi=300)
 

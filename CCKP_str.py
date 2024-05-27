@@ -172,7 +172,7 @@ with col2:
     region = st.selectbox('Region', all_reg)
     region_code = geo_ref[(geo_ref['Country'] == country) & (geo_ref['State'] == region)]['State Code'].values[0]
 
-st.write(f'Additional resources about all the countries [here](https://climateknowledgeportal.worldbank.org/general-resources).')
+st.write(f'Additional resources on all countries [here](https://climateknowledgeportal.worldbank.org/general-resources).')
 # Defining variable
 st.subheader('Select variables')
 
